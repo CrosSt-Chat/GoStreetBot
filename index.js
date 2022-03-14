@@ -5,7 +5,7 @@ import { loadBotData, log } from "./src/handler/utils.js";
 import { handleTMessage } from "./src/handler/telegram.js";
 import 'dotenv/config';
 
-const { BOT_TOKEN, ADMIN_ID, CROSST_PASSWD, CROSST_NICK, CROSST_CHANNEL, GROUP_ID } = process.env;
+const { BOT_TOKEN, ADMIN_ID, CROSST_PASSWD, CROSST_NICK, CROSST_CHANNEL, GROUP_ID, LANGUAGE } = process.env;
 const bot = new Telegraf(BOT_TOKEN);
 const CrosstWs = new WebSocket('wss://ws.crosst.chat:35197');
 

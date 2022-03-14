@@ -2,17 +2,17 @@ import { bot } from "../../index.js";
 import { GROUP_ID } from "../../index.js";
 import { checkData, log, saveBotData } from "./utils.js";
 import { CrosstClient } from "./crosst.js";
-import {TelegramCommands} from "./command.js";
+import { TelegramCommands } from "./command.js";
 
 export async function handleTMessage(ctx) {
     let msg = ctx.message;
     if (msg.text && msg.text.startsWith('/')) {
-        let {text} = msg;
+        let { text } = msg;
         if (TelegramCommands.hasOwnProperty(text))
             TelegramCommands[text]();
     }
     else
-    CrosstClient.syncMessage(msg);
+        CrosstClient.syncMessage(msg);
 }
 
 export class TelegramClient {

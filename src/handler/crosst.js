@@ -1,4 +1,4 @@
-import {BOT_NAME, CROSST_NICK, CrosstWs, LANGUAGE} from "../../index.js";
+import { BOT_NAME, CROSST_NICK, CrosstWs, LANGUAGE } from "../../index.js";
 import { log, saveBotData } from "./utils.js";
 import { TelegramClient } from "./telegram.js";
 import { CrosstCommands } from "./command.js";
@@ -20,20 +20,20 @@ export async function handleCMessage(message) {
             await TelegramClient.syncMessage(data);
             break;
         case 'onlineAdd':
-            await TelegramClient.syncMessage({nick: 'System', text: strings[LANGUAGE].joined.replace('{n}', nick), trip: '*'});
+            await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].joined.replace('{n}', nick), trip: '*' });
             break;
         case 'onlineRemove':
-            await TelegramClient.syncMessage({nick: 'System', text: strings[LANGUAGE].left.replace('{n}', nick), trip: '*'});
+            await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].left.replace('{n}', nick), trip: '*' });
             break;
         case 'info':
-            await TelegramClient.syncMessage({nick: 'System', text: strings[LANGUAGE].info + text, trip: '*'});
+            await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].info + text, trip: '*' });
             break;
         case 'onlineSet':
-            let {nicks} = data;
+            let { nicks } = data;
             if (nicks.length)
-            await TelegramClient.syncMessage({nick: 'System', text: strings[LANGUAGE].onlineList.replace('{1}', nicks.length).replace('{2}', nicks.join(', ')), trip: '*'});
+                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].onlineList.replace('{1}', nicks.length).replace('{2}', nicks.join(', ')), trip: '*' });
             else
-                await TelegramClient.syncMessage({nick: 'System', text: strings[LANGUAGE].noOnline, trip: '*'});
+                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].noOnline, trip: '*' });
             break;
         default:
             break;
