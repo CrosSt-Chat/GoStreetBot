@@ -1,0 +1,20 @@
+{
+  "name": "crosstbot",
+  "version": "1.0.0",
+  "description": "A bot that connects Crosst and Telegram.",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "https-proxy-agent": "^5.0.0",
+    "telegraf": "^4.7.0",
+    "ws": "^8.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "AnotiaWang",
+  "license": "ISC",
+  "repository": "https://github.com/CrosSt-Chat/GoStreetBot"
+}
