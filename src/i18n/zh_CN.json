@@ -1,3 +1,8 @@
 {
-  "help": "**帮助**"
+  "help": "GitHub：https://github.com/CrosSt-Chat/GoStreetBot",
+  "joined": "{n} 加入了聊天室",
+  "left": "{n} 退出了聊天室",
+  "info": "[通知]",
+  "onlineList": "当前聊天室在线 {1}（{2}）。",
+  "noOnline": "当前聊天室无人在线。"
 }

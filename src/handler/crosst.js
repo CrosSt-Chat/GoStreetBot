@@ -1,24 +1,39 @@
-import { BOT_NAME, CROSST_NICK, CrosstWs } from "../../index.js";
+import {BOT_NAME, CROSST_NICK, CrosstWs, LANGUAGE} from "../../index.js";
 import { log, saveBotData } from "./utils.js";
 import { TelegramClient } from "./telegram.js";
 import { CrosstCommands } from "./command.js";
+import strings from "../strings.js";
 
 export async function handleCMessage(message) {
     let data = JSON.parse(message.data);
+    let { nick, text } = data;
     switch (data.cmd) {
         case 'chat':
-            let { nick, text } = data;
             if (nick === CROSST_NICK)
                 break;
-            if (text.startsWith('/')) {
-                text.splice(1);
+            if (text.startsWith('!')) {
+                text = text.slice(1);
                 let [command, arg] = text.split(' ');
                 if (CrosstCommands.hasOwnProperty(command))
                     CrosstCommands[command](arg);
             }
             await TelegramClient.syncMessage(data);
             break;
+        case 'onlineAdd':
+            await TelegramClient.syncMessage({nick: 'System', text: strings[LANGUAGE].joined.replace('{n}', nick), trip: '*'});
+            break;
+        case 'onlineRemove':
+            await TelegramClient.syncMessage({nick: 'System', text: strings[LANGUAGE].left.replace('{n}', nick), trip: '*'});
+            break;
         case 'info':
+            await TelegramClient.syncMessage({nick: 'System', text: strings[LANGUAGE].info + text, trip: '*'});
+            break;
+        case 'onlineSet':
+            let {nicks} = data;
+            if (nicks.length)
+            await TelegramClient.syncMessage({nick: 'System', text: strings[LANGUAGE].onlineList.replace('{1}', nicks.length).replace('{2}', nicks.join(', ')), trip: '*'});
+            else
+                await TelegramClient.syncMessage({nick: 'System', text: strings[LANGUAGE].noOnline, trip: '*'});
             break;
         default:
             break;
@@ -33,6 +48,10 @@ export class CrosstClient {
 
     static sendMessageText(text) {
         CrosstWs.send(JSON.stringify({ cmd: 'chat', text: text }));
+    }
+
+    static sendCommand(data) {
+        CrosstWs.send(JSON.stringify(data));
     }
 
     static syncMessage(msg) {

@@ -37,14 +37,13 @@ export function loadBotData() {
 export function saveBotData() {
     function save(name, data) {
         fs.writeFileSync(`./data/${name}.json`, JSON.stringify(data));
-        log(`保存 ${name} 数据完成`);
     }
     if (!fs.existsSync('./data'))
         fs.mkdirSync('./data');
     save('userData', userData);
 }
 
-export function checkCData(data) {
+export function checkData(data) {
     let { nick, trip, tid } = data;
     if (!userData[trip])
         userData[trip] = { nick: nick, tid: null };
