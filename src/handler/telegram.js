@@ -1,17 +1,19 @@
-import { bot } from "../../index.js";
-import { GROUP_ID } from "../../index.js";
+import {ADMIN_ID, bot} from "../../index.js";
 import { checkData, log, saveBotData } from "./utils.js";
 import { CrosstClient } from "./crosst.js";
 import { TelegramCommands } from "./command.js";
 
 export async function handleTMessage(ctx) {
     let msg = ctx.message;
+    let executed = false;
     if (msg.text && msg.text.startsWith('/')) {
         let { text } = msg;
-        if (TelegramCommands.hasOwnProperty(text))
+        if (TelegramCommands.hasOwnProperty(text)) {
+            executed = true;
             TelegramCommands[text]();
+        }
     }
-    else
+    if (!executed)
         CrosstClient.syncMessage(msg);
 }
 
@@ -22,7 +24,7 @@ export class TelegramClient {
         checkData(data);
         // Telegram 的 Markdown parse 方法和十字街的不一样，todo 自己实现
         try {
-            await bot.telegram.sendMessage(GROUP_ID, text);
+            await bot.telegram.sendMessage(ADMIN_ID, text);
             saveBotData();
         }
         catch (e) {

@@ -1,4 +1,4 @@
-import { BOT_NAME, CROSST_NICK, CrosstWs, LANGUAGE } from "../../index.js";
+import { BOT_NAME, CrosstWs, LANGUAGE } from "../../index.js";
 import { log, saveBotData } from "./utils.js";
 import { TelegramClient } from "./telegram.js";
 import { CrosstCommands } from "./command.js";
@@ -9,8 +9,6 @@ export async function handleCMessage(message) {
     let { nick, text } = data;
     switch (data.cmd) {
         case 'chat':
-            if (nick === CROSST_NICK)
-                break;
             if (text.startsWith('!')) {
                 text = text.slice(1);
                 let [command, arg] = text.split(' ');
@@ -36,6 +34,7 @@ export async function handleCMessage(message) {
                 await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].noOnline, trip: '*' });
             break;
         default:
+            await TelegramClient.syncMessage({ nick: 'Unsupported Type', text: text, trip: '*' });
             break;
     }
 }
@@ -55,7 +54,6 @@ export class CrosstClient {
     }
 
     static syncMessage(msg) {
-        let nick = msg.from.first_name + (msg.from.last_name ? ` ${msg.from.last_name}` : '');
         let { text, photo } = msg, replyMsg, replyText = '', sender = '';
         if (msg.reply_to_message) {
             replyMsg = msg.reply_to_message;
@@ -73,7 +71,6 @@ export class CrosstClient {
             }
             // 来自电报群的消息
             else {
-                replyText = replyMsg.from.first_name + (replyMsg.from.last_name ? ` ${replyMsg.from.last_name}` : '') + ': ';
                 if (replyMsg.text)
                     replyText += replyMsg.text.slice(replyMsg.text.indexOf('\n') + 1);
                 else if (replyMsg.photo) {
@@ -83,11 +80,11 @@ export class CrosstClient {
             }
         }
         if (text) {
-            text = replyText ? `${nick}: \n> ${replyText}\n\n${sender}${text}` : `${nick}: ${text}`;
+            text = replyText ? `> ${replyText}\n\n${sender}${text}` : text;
             this.sendMessageText(text);
         }
         else if (photo) {
-            this.sendMessageText(`${nick}: [Unsupported] [图片]`);
+            this.sendMessageText(`[Unsupported] [图片]`);
             // Todo: 获取图片、上传图床、回复
         }
         saveBotData();
