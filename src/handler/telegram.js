@@ -1,20 +1,23 @@
-import {ADMIN_ID, bot} from "../../index.js";
+import { ADMIN_ID, bot } from "../../index.js";
 import { checkData, log, saveBotData } from "./utils.js";
 import { CrosstClient } from "./crosst.js";
 import { TelegramCommands } from "./command.js";
 
 export async function handleTMessage(ctx) {
     let msg = ctx.message;
-    let executed = false;
-    if (msg.text && msg.text.startsWith('/')) {
-        let { text } = msg;
-        if (TelegramCommands.hasOwnProperty(text)) {
-            executed = true;
-            TelegramCommands[text]();
+    let user = msg.from.id.toString();
+    if (user === ADMIN_ID) {
+        let executed = false;
+        if (msg.text && msg.text.startsWith('/')) {
+            let {text} = msg;
+            if (TelegramCommands.hasOwnProperty(text)) {
+                executed = true;
+                TelegramCommands[text]();
+            }
         }
+        if (!executed)
+            CrosstClient.syncMessage(msg);
     }
-    if (!executed)
-        CrosstClient.syncMessage(msg);
 }
 
 export class TelegramClient {
