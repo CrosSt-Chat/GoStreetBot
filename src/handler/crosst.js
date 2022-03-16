@@ -1,5 +1,5 @@
 import { BOT_NAME, CrosstWs, LANGUAGE } from "../../index.js";
-import { log, saveBotData } from "./utils.js";
+import { log, downloadPhoto } from "./utils.js";
 import { TelegramClient } from "./telegram.js";
 import { CrosstCommands } from "./command.js";
 import strings from "../strings.js";
@@ -20,23 +20,26 @@ export class CrosstClient {
                 await TelegramClient.syncMessage(data);
                 break;
             case 'onlineAdd':
-                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].joined.replace('{n}', nick), trip: '*' });
+                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].joined.replace('{n}', nick), trip: 'info' });
                 break;
             case 'onlineRemove':
-                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].left.replace('{n}', nick), trip: '*' });
+                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].left.replace('{n}', nick), trip: 'info' });
                 break;
             case 'info':
-                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].info + text, trip: '*' });
+                await TelegramClient.syncMessage({ nick: 'System', text: text, trip: 'info' }, true);
                 break;
+            case 'warn':
+                 await TelegramClient.syncMessage({ nick: 'System', text: text, trip: 'warn' }, true);
+                 break;
             case 'onlineSet':
                 let { nicks } = data;
                 if (nicks.length)
-                    await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].onlineList.replace('{1}', nicks.length).replace('{2}', nicks.join(', ')), trip: '*' });
+                    await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].onlineList.replace('{1}', nicks.length).replace('{2}', nicks.join(', ')), trip: 'info' });
                 else
-                    await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].noOnline, trip: '*' });
+                    await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].noOnline, trip: 'info' });
                 break;
             default:
-                await TelegramClient.syncMessage({ nick: 'Unsupported Type', text: text, trip: '*' });
+                await TelegramClient.syncMessage({ nick: 'System', text: text, trip: 'unsupported' });
                 break;
         }
     }
@@ -50,12 +53,8 @@ export class CrosstClient {
         CrosstWs.send(JSON.stringify({ cmd: 'chat', text: text }));
     }
 
-    static sendCommand(data) {
-        CrosstWs.send(JSON.stringify(data));
-    }
-
     static async syncMessage(msg) {
-        let { text, photo } = msg, replyMsg, replyText = '', sender = '';
+        let { text, photo, caption, entities } = msg, replyMsg, replyText = '', sender = '';
         if (msg.reply_to_message) {
             replyMsg = msg.reply_to_message;
             // 来自十字街的消息
@@ -66,8 +65,7 @@ export class CrosstClient {
                 if (replyMsg.text)
                     replyText = replyMsg.text.slice(replyMsg.text.indexOf('\n') + 1);
                 else if (replyMsg.photo) {
-                    replyText = `[Unsupported] [图片]`;
-                    // Todo: 获取图片、上传图床、回复
+                    await downloadPhoto(replyMsg.photo[0].file_id, Markdown.from(caption, entities || []));
                 }
             }
             // 来自电报群的消息
@@ -75,19 +73,20 @@ export class CrosstClient {
                 if (replyMsg.text)
                     replyText += replyMsg.text.slice(replyMsg.text.indexOf('\n') + 1);
                 else if (replyMsg.photo) {
-                    replyText += `[Unsupported] [图片]`;
-                    // Todo: 获取图片、上传图床、回复
+                    await downloadPhoto(replyMsg.photo[0].file_id, Markdown.from(caption, entities || []));
                 }
             }
         }
         if (text) {
+            if (entities) {
+                text = Markdown.from(text, msg.entities);
+            }
             text = replyText ? `> ${replyText}\n\n${sender}${text}` : text;
             this.sendMessageText(text);
         }
         else if (photo) {
-            this.sendMessageText(`[Unsupported] [图片]`);
-            // Todo: 获取图片、上传图床、回复
+            let photo = msg.photo, fileId = photo[photo.length - 1].file_id;
+            await downloadPhoto(fileId, Markdown.from(caption, entities || []));
         }
-        saveBotData();
     }
 }

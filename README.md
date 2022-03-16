@@ -11,6 +11,7 @@ A bot that connects Crosst and Telegram.
   - `CROSST_PASSWD`: A string that will be used to generate a _salt_, which acts as the unique identifier in Crosst.
   - `ADMIN_ID`: Your Telegram account UID.
   - `CROSST_CHANNEL`: The Crosst channel you to join with the bot.
+  - `SMMS_TOKEN`: The token obtained from sm.ms. You need to set this if you want to sync images.
 - Run `npm install && npm start`.
 - You are good to go. Receive and send messages via your bot, and watch the bot synchronize them to Crosst.
 

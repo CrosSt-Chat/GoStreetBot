@@ -1,5 +1,4 @@
 import { CrosstClient } from "./crosst.js";
-import { TelegramClient } from "./telegram.js";
 import { LANGUAGE } from "../../index.js";
 import strings from "../strings.js";
 

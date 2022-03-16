@@ -1,6 +1,9 @@
 import * as fs from 'fs';
-import { bot, ADMIN_ID } from "../../index.js";
+import { ADMIN_ID, bot, BOT_TOKEN, SMMS_TOKEN } from "../../index.js";
 import strings from "../strings.js";
+import * as path from "path";
+import request from 'request';
+import { CrosstClient } from "./crosst.js";
 
 let userData = {};
 
@@ -49,4 +52,65 @@ export function checkData(data) {
         userData[trip] = { nick: nick, tid: null };
     else if (tid)
         userData[trip].tid = tid;
+}
+
+export async function downloadPhoto(file_id, caption) {
+    if (SMMS_TOKEN) {
+        log(`正在下载图片...`, true);
+        let result = await bot.telegram.getFile(file_id);
+        let filePath = result.file_path;
+        let realFilePath = `./temp/${path.basename(filePath)}`;
+        let url = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`;
+        try {
+            if (!fs.existsSync('./temp'))
+                fs.mkdirSync('./temp');
+            let file = fs.createWriteStream(realFilePath);
+            request(url).pipe(file).on('close', () => {
+                log(`下载完成：${realFilePath}`);
+                file.close();
+                uploadPhoto(realFilePath, caption);
+            });
+        } catch (e) {
+            log(`传输图片时出错：${e.message}`, true);
+        }
+    }
+    else {
+        log(`请在 .env 中配置 SMMS_TOKEN`, true);
+    }
+}
+
+export function uploadPhoto(filePath, caption) {
+    log(`正在上传至图床...`, true);
+    let options = {
+        uri: 'https://sm.ms/api/v2/upload',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': SMMS_TOKEN
+        },
+        formData: {
+            smfile: fs.createReadStream(filePath),
+            type: 'json'
+        }
+    };
+
+    request.post(options, (err, res) => {
+        if (err)
+            log(`上传图片时出错：${err.message}`, true);
+        else {
+            let data = JSON.parse(res.body);
+            console.log(data);
+            if (data.images) {
+                let text = `![Uploaded by GoStreetBot](${data.images})`;
+                if (caption)
+                    text += `\n\n${caption}`;
+                CrosstClient.sendMessageText(text);
+                fs.rmSync(filePath);
+                log('上传完成！');
+            }
+            else {
+                log(`上传图片时出错：${data.message}`, true);
+            }
+        }
+    }, 'utf8');
 }

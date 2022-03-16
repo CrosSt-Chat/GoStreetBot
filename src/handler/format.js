@@ -4,7 +4,7 @@ export class Markdown {
         let title;
         let url;
         let i, len;
-
+        str = str.replace(/<+/g, '&lt;').replace(/>+/g, '&gt;');
         let bold = str.match(/\*{2}[^*].*?\*{2}/g); // 惰性匹配
         if (bold) {
             for (i = 0, len = bold.length; i < len; i++) {

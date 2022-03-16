@@ -7,14 +7,16 @@ import { Markdown } from "./format.js";
 export class TelegramClient {
     static async handleMessage(ctx) {
         let msg = ctx.message;
+        let { text } = msg;
         let user = msg.from.id.toString();
         if (user === ADMIN_ID) {
             let executed = false;
-            if (msg.text && msg.text.startsWith('/')) {
-                let { text } = msg;
-                if (TelegramCommands.hasOwnProperty(text)) {
+            if (text && text.startsWith('/')) {
+                let command = text.split(' ')[0].slice(1);
+                if (TelegramCommands.hasOwnProperty(command)) {
                     executed = true;
-                    TelegramCommands[text]();
+                    let arg = text.slice(command.length + 2);
+                    TelegramCommands[command](arg);
                 }
             }
             if (!executed)
@@ -26,7 +28,6 @@ export class TelegramClient {
         let { nick, text, trip } = data;
         text = Markdown.toHTML(`${nick} [${trip}]:\n${text}`);
         checkData(data);
-        // Telegram 的 Markdown parse 方法和十字街的不一样，todo 自己实现
         try {
             await bot.telegram.sendMessage(ADMIN_ID, text, { parse_mode: 'HTML' });
             saveBotData();
