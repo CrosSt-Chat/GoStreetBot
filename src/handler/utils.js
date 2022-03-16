@@ -99,18 +99,21 @@ export function uploadPhoto(filePath, caption) {
             log(`上传图片时出错：${err.message}`, true);
         else {
             let data = JSON.parse(res.body);
-            console.log(data);
-            if (data.images) {
-                let text = `![Uploaded by GoStreetBot](${data.images})`;
+            let url = '';
+            if (data.success)
+                url = data.data.url;
+            else if (data.images)
+                url = data.images;
+            if (url) {
+                let text = `![Uploaded by GoStreetBot](${url})`;
                 if (caption)
                     text += `\n\n${caption}`;
                 CrosstClient.sendMessageText(text);
                 fs.rmSync(filePath);
                 log('上传完成！');
             }
-            else {
+            else
                 log(`上传图片时出错：${data.message}`, true);
-            }
         }
     }, 'utf8');
 }
