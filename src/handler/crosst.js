@@ -3,43 +3,44 @@ import { log, saveBotData } from "./utils.js";
 import { TelegramClient } from "./telegram.js";
 import { CrosstCommands } from "./command.js";
 import strings from "../strings.js";
-
-export async function handleCMessage(message) {
-    let data = JSON.parse(message.data);
-    let { nick, text } = data;
-    switch (data.cmd) {
-        case 'chat':
-            if (text.startsWith('!')) {
-                text = text.slice(1);
-                let [command, arg] = text.split(' ');
-                if (CrosstCommands.hasOwnProperty(command))
-                    CrosstCommands[command](arg);
-            }
-            await TelegramClient.syncMessage(data);
-            break;
-        case 'onlineAdd':
-            await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].joined.replace('{n}', nick), trip: '*' });
-            break;
-        case 'onlineRemove':
-            await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].left.replace('{n}', nick), trip: '*' });
-            break;
-        case 'info':
-            await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].info + text, trip: '*' });
-            break;
-        case 'onlineSet':
-            let { nicks } = data;
-            if (nicks.length)
-                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].onlineList.replace('{1}', nicks.length).replace('{2}', nicks.join(', ')), trip: '*' });
-            else
-                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].noOnline, trip: '*' });
-            break;
-        default:
-            await TelegramClient.syncMessage({ nick: 'Unsupported Type', text: text, trip: '*' });
-            break;
-    }
-}
+import { Markdown } from "./format.js";
 
 export class CrosstClient {
+    static async handleMessage(message) {
+        let data = JSON.parse(message.data);
+        let { nick, text } = data;
+        switch (data.cmd) {
+            case 'chat':
+                if (text.startsWith('!')) {
+                    text = text.slice(1);
+                    let [command, arg] = text.split(' ');
+                    if (CrosstCommands.hasOwnProperty(command))
+                        CrosstCommands[command](arg);
+                }
+                await TelegramClient.syncMessage(data);
+                break;
+            case 'onlineAdd':
+                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].joined.replace('{n}', nick), trip: '*' });
+                break;
+            case 'onlineRemove':
+                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].left.replace('{n}', nick), trip: '*' });
+                break;
+            case 'info':
+                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].info + text, trip: '*' });
+                break;
+            case 'onlineSet':
+                let { nicks } = data;
+                if (nicks.length)
+                    await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].onlineList.replace('{1}', nicks.length).replace('{2}', nicks.join(', ')), trip: '*' });
+                else
+                    await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].noOnline, trip: '*' });
+                break;
+            default:
+                await TelegramClient.syncMessage({ nick: 'Unsupported Type', text: text, trip: '*' });
+                break;
+        }
+    }
+
     static joinChannel(channel, nick, password) {
         CrosstWs.send(JSON.stringify({ cmd: 'join', channel: channel, nick: nick, password: password }));
         log(`以昵称 ${nick} 加入聊天室 ${channel}...`);
@@ -53,7 +54,7 @@ export class CrosstClient {
         CrosstWs.send(JSON.stringify(data));
     }
 
-    static syncMessage(msg) {
+    static async syncMessage(msg) {
         let { text, photo } = msg, replyMsg, replyText = '', sender = '';
         if (msg.reply_to_message) {
             replyMsg = msg.reply_to_message;
