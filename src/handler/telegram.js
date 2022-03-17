@@ -1,5 +1,5 @@
 import { ADMIN_ID, bot } from "../../index.js";
-import { checkData, log, saveBotData } from "./utils.js";
+import { log } from "./utils.js";
 import { CrosstClient } from "./crosst.js";
 import { TelegramCommands } from "./command.js";
 import { Markdown } from "./format.js";
@@ -27,10 +27,8 @@ export class TelegramClient {
     static async syncMessage(data) {
         let { nick, text, trip } = data;
         text = Markdown.toHTML(`${nick} [${trip}]:\n${text}`);
-        checkData(data);
         try {
             await bot.telegram.sendMessage(ADMIN_ID, text, { parse_mode: 'HTML' });
-            saveBotData();
         }
         catch (e) {
             log(`向 Telegram 同步消息时出错：${e.message}`, true);

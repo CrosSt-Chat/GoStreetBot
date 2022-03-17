@@ -5,7 +5,7 @@ import * as path from "path";
 import request from 'request';
 import { CrosstClient } from "./crosst.js";
 
-let userData = {};
+export let userData = { welcome: '', bye: '' };
 
 /**
  * console.log wrapper，加上时间
@@ -44,14 +44,6 @@ export function saveBotData() {
     if (!fs.existsSync('./data'))
         fs.mkdirSync('./data');
     save('userData', userData);
-}
-
-export function checkData(data) {
-    let { nick, trip, tid } = data;
-    if (!userData[trip])
-        userData[trip] = { nick: nick, tid: null };
-    else if (tid)
-        userData[trip].tid = tid;
 }
 
 export async function downloadPhoto(file_id, caption) {

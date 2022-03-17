@@ -1,5 +1,5 @@
 import { BOT_NAME, CrosstWs, LANGUAGE } from "../../index.js";
-import { log, downloadPhoto } from "./utils.js";
+import { log, downloadPhoto, userData } from "./utils.js";
 import { TelegramClient } from "./telegram.js";
 import { CrosstCommands } from "./command.js";
 import strings from "../strings.js";
@@ -20,10 +20,14 @@ export class CrosstClient {
                 await TelegramClient.syncMessage(data);
                 break;
             case 'onlineAdd':
-                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].joined.replace('{n}', nick), trip: 'info' });
+                if (userData.welcome)
+                    CrosstClient.sendMessageText(userData.welcome.replace(/%n/g, nick));
+                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE]["joined"].replace('{n}', nick), trip: 'info' });
                 break;
             case 'onlineRemove':
-                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].left.replace('{n}', nick), trip: 'info' });
+                if (userData.bye)
+                    CrosstClient.sendMessageText(userData.bye.replace(/%n/g, nick));
+                await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE]["left"].replace('{n}', nick), trip: 'info' });
                 break;
             case 'info':
                 await TelegramClient.syncMessage({ nick: 'System', text: text, trip: 'info' }, true);
@@ -34,9 +38,9 @@ export class CrosstClient {
             case 'onlineSet':
                 let { nicks } = data;
                 if (nicks.length)
-                    await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].onlineList.replace('{1}', nicks.length).replace('{2}', nicks.join(', ')), trip: 'info' });
+                    await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE]["onlineList"].replace('{1}', nicks.length).replace('{2}', nicks.join(', ')), trip: 'info' });
                 else
-                    await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE].noOnline, trip: 'info' });
+                    await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE]["noOnline"], trip: 'info' });
                 break;
             default:
                 await TelegramClient.syncMessage({ nick: 'System', text: text, trip: 'unsupported' });
