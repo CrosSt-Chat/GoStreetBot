@@ -33,8 +33,8 @@ export class CrosstClient {
                 await TelegramClient.syncMessage({ nick: 'System', text: text, trip: 'info' }, true);
                 break;
             case 'warn':
-                 await TelegramClient.syncMessage({ nick: 'System', text: text, trip: 'warn' }, true);
-                 break;
+                await TelegramClient.syncMessage({ nick: 'System', text: text, trip: 'warn' }, true);
+                break;
             case 'onlineSet':
                 let { nicks } = data;
                 if (nicks.length)
@@ -58,34 +58,28 @@ export class CrosstClient {
     }
 
     static async syncMessage(msg) {
-        let { text, photo, caption, entities } = msg, replyMsg, replyText = '', sender = '';
-        if (msg.reply_to_message) {
-            replyMsg = msg.reply_to_message;
-            // 来自十字街的消息
-            if (replyMsg.from.username === BOT_NAME) {
-                // 分割出发送者
-                sender = '@' + replyMsg.text.split(' ')[0] + ' ';
-                // 根据回复消息类型进行回应
-                if (replyMsg.text)
-                    replyText = replyMsg.text.slice(replyMsg.text.indexOf('\n') + 1);
-                else if (replyMsg.photo) {
-                    await downloadPhoto(replyMsg.photo[0].file_id, Markdown.from(caption, entities || []));
-                }
+        let { text, photo, caption, entities, reply_to_message } = msg, replyText = '', sender = '';
+        if (reply_to_message && reply_to_message.text) {
+            if (reply_to_message.from.username === BOT_NAME) {
+                sender = '@' + reply_to_message.text.split(' ')[0] + ' ';
             }
-            // 来自电报群的消息
-            else {
-                if (replyMsg.text)
-                    replyText += replyMsg.text.slice(replyMsg.text.indexOf('\n') + 1);
-                else if (replyMsg.photo) {
-                    await downloadPhoto(replyMsg.photo[0].file_id, Markdown.from(caption, entities || []));
-                }
-            }
+            replyText = reply_to_message.text.slice(reply_to_message.text.indexOf('\n') + 1);
         }
         if (text) {
+            // 先格式化文本
             if (entities) {
                 text = Markdown.from(text, msg.entities);
             }
-            text = replyText ? `> ${replyText}\n\n${sender}${text}` : text;
+            // 将被回复文本放入消息中
+            if (replyText) {
+                let lines = replyText.split('\n');
+                replyText = '';
+                for (let line of lines) {
+                    replyText += '> ' + line + '\n';
+                }
+                replyText += `\n${sender}`;
+            }
+            text = `${replyText}${text}`;
             this.sendMessageText(text);
         }
         else if (photo) {
