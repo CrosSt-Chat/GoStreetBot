@@ -12,7 +12,7 @@ export class Markdown {
             }
         }
 
-        let italic = str.match(/[*_][^*].*?[*_]/g);
+        let italic = str.match(/[*][^*].*?[*]/g);
         if (italic) {
             for (i = 0, len = italic.length; i < len; i++) {
                 str = str.replace(italic[i], '<i>' + italic[i].substring(1, italic[i].length - 1) + '</i>');
@@ -26,7 +26,7 @@ export class Markdown {
             }
         }
 
-        let code = str.match(/`.+`/g);
+        let code = str.match(/[`][^`].*?[`]/g);
         if (code) {
             for (i = 0, len = code.length; i < len; i++) {
                 str = str.replace(code[i], '<code>' + code[i].substring(1, code[i].length - 1) + '</code>');
@@ -36,7 +36,7 @@ export class Markdown {
         const re1 = /\(.*\)/;
         const re2 = /\[.*]/;
 
-        let a = str.match(/!?\[.*]\(.*\)/g);
+        let a = str.match(/!?\[[^\[].*?]\([^()].*?\)/g);
         if (a) {
             for (i = 0, len = a.length; i < len; i++) {
                 url = a[i].match(re1)[0];
@@ -51,7 +51,7 @@ export class Markdown {
         return str;
     }
 
-    // This parsing method maybe buggy in extreme cases
+    // This parsing method may be buggy in extreme cases
     static from(text, entities) {
         for (let i = 0; i < entities.length; i++) {
             let part1 = text.slice(0, entities[i].offset);
@@ -78,6 +78,15 @@ export class Markdown {
                 case 'underline':
                     text = `${part1}__${part2}__${part3}`;
                     addLength = 4;
+                    break;
+                case 'code':
+                    if (part2.includes('\n')) {
+                        text = part1 + '```\n' + part2 + '\n```' + part3;
+                        addLength = 8;
+                    } else {
+                        text = `${part1}\`${part2}\`${part3}`;
+                        addLength = 2;
+                    }
                     break;
                 default:
                     break;

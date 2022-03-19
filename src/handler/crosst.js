@@ -59,11 +59,14 @@ export class CrosstClient {
 
     static async syncMessage(msg) {
         let { text, photo, caption, entities, reply_to_message } = msg, replyText = '', sender = '';
-        if (reply_to_message && reply_to_message.text) {
+        if (reply_to_message) {
+            replyText = reply_to_message.text || reply_to_message.caption || '';
             if (reply_to_message.from.username === BOT_NAME) {
                 sender = '@' + reply_to_message.text.split(' ')[0] + ' ';
+                replyText = replyText.slice(replyText.indexOf('\n') + 1);
             }
-            replyText = reply_to_message.text.slice(reply_to_message.text.indexOf('\n') + 1);
+            if (reply_to_message.photo)
+                replyText = '[图片]\n' + replyText;
         }
         if (text) {
             // 先格式化文本
