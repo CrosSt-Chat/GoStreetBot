@@ -5,7 +5,7 @@ import * as path from "path";
 import request from 'request';
 import { CrosstClient } from "./crosst.js";
 
-export let userData = { welcome: '', bye: '' };
+export let userData = { welcome: [], bye: [] };
 
 /**
  * console.log wrapper，加上时间

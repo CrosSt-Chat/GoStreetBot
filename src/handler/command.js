@@ -20,9 +20,10 @@ export class TelegramCommands {
             TelegramClient.syncMessage({
                 nick: 'GoStreetBot',
                 trip: 'command',
-                text: strings[LANGUAGE]["autoWelcome"].replace('{old}', userData.welcome.join('&&')),
+                text: strings[LANGUAGE]["autoWelcome"].replace('{old}', userData.welcome ? userData.welcome.join('&&') : 'None')
             }).catch();
-            userData.welcome = null;
+            userData.welcome = [];
+            log(`欢迎消息已关闭`);
         }
         saveBotData();
     }
@@ -36,9 +37,10 @@ export class TelegramCommands {
             TelegramClient.syncMessage({
                 nick: 'GoStreetBot',
                 trip: 'command',
-                text: strings[LANGUAGE]["autoBye"].replace('{old}', userData.bye.join('&&'))
+                text: strings[LANGUAGE]["autoBye"].replace('{old}', userData.bye ? userData.bye.join('&&') : 'None')
             }).catch();
-            userData.bye = null;
+            userData.bye = [];
+            log(`欢送消息已关闭`);
         }
         saveBotData();
     }
