@@ -20,13 +20,17 @@ export class CrosstClient {
                 await TelegramClient.syncMessage(data);
                 break;
             case 'onlineAdd':
-                if (userData.welcome)
-                    CrosstClient.sendMessageText(userData.welcome.replace(/%n/g, nick));
+                if (userData.welcome) {
+                    let welcome = userData.welcome[Math.floor(Math.random() * userData.welcome.length)];
+                    CrosstClient.sendMessageText(welcome.replace(/%n/g, nick));
+                }
                 await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE]["joined"].replace('{n}', nick), trip: 'info' });
                 break;
             case 'onlineRemove':
-                if (userData.bye)
-                    CrosstClient.sendMessageText(userData.bye.replace(/%n/g, nick));
+                if (userData.bye) {
+                    let bye = userData.bye[Math.floor(Math.random() * userData.bye.length)];
+                    CrosstClient.sendMessageText(bye.replace(/%n/g, nick));
+                }
                 await TelegramClient.syncMessage({ nick: 'System', text: strings[LANGUAGE]["left"].replace('{n}', nick), trip: 'info' });
                 break;
             case 'info':

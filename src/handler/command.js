@@ -13,32 +13,32 @@ export class CrosstCommands {
 export class TelegramCommands {
     static welcome(arg) {
         if (arg) {
-            userData.welcome = arg;
+            userData.welcome = arg.split('&&');
             log(`欢迎消息已设为：${arg}`, true);
         }
         else {
-            userData.welcome = '';
             TelegramClient.syncMessage({
                 nick: 'GoStreetBot',
                 trip: 'command',
-                text: strings[LANGUAGE]["autoWelcome"]
+                text: strings[LANGUAGE]["autoWelcome"].replace('{old}', userData.welcome.join('&&')),
             }).catch();
+            userData.welcome = null;
         }
         saveBotData();
     }
 
     static bye(arg) {
         if (arg) {
-            userData.bye = arg;
+            userData.bye = arg.split('&&');
             log(`拜拜消息已设为：${arg}`, true);
         }
         else {
-            userData.bye = '';
             TelegramClient.syncMessage({
                 nick: 'GoStreetBot',
                 trip: 'command',
-                text: strings[LANGUAGE]["autoBye"]
+                text: strings[LANGUAGE]["autoBye"].replace('{old}', userData.bye.join('&&'))
             }).catch();
+            userData.bye = null;
         }
         saveBotData();
     }

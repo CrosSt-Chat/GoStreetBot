@@ -1,10 +1,10 @@
 {
-  "help": "GitHub：https://github.com/CrosSt-Chat/GoStreetBot",
+  "help": "**GoStreetBot**\n适用于十字街的人形自走 Bot。\n\n功能：\n- 同步十字街和 Telegram 的消息；\n- Markdown 和富文本自动转换；\n- 图片一键上传至 sm.ms；\n- 加入和退出自动回复；\n- 开发中……\n\nGitHub：https://github.com/CrosSt-Chat/GoStreetBot",
   "joined": "{n} 加入了聊天室",
   "left": "{n} 退出了聊天室",
   "onlineList": "当前聊天室在线 {1}（{2}）。",
   "noOnline": "当前聊天室无人在线。",
   "transferring": "正在传输图片...",
-  "autoWelcome": "入群自动欢迎功能已关闭。您可以使用 “/welcome [内容]” 进行设置。欢迎文本中的 `%n` 会被替换为入群用户名。",
-  "autoBye": "退群自动回复功能已关闭。您可以使用 “/bye [内容]” 进行设置。退群文本中的 `%n` 会被替换为退群用户名。"
+  "autoWelcome": "入群自动欢迎功能已关闭。\n原先内容：`{old}`\n\n您可以使用 “/welcome [内容]” 设置入群欢迎。可指定多条欢迎消息，消息使用 `&&` 分隔，机器人会随机选择一条发送。欢迎文本中的 `%n` 会被替换为入群用户名。",
+  "autoBye": "退群自动回复功能已关闭。\n原先内容：`{old}`\n\n您可以使用 “/bye [内容]” 设置退群欢迎。可指定多条欢迎消息，消息使用 `&&` 分隔，机器人会随机选择一条发送。退群文本中的 `%n` 会被替换为退群用户名。"
 }
