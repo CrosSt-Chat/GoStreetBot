@@ -131,11 +131,11 @@ export function uploadPhoto(filePath, caption) {
                 if (caption)
                     text += `\n\n${caption}`;
                 CrosstClient.sendMessageText(text);
-                fs.rmSync(filePath);
                 log('上传完成！');
             }
             else
                 log(`上传图片时出错：${data.message}`, true);
         }
+        fs.rmSync(filePath);
     }, 'utf8');
 }
