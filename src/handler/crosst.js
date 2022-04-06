@@ -1,5 +1,5 @@
 import { BOT_NAME, CrosstWs, LANGUAGE } from "../../index.js";
-import { log, downloadPhoto, userData } from "./utils.js";
+import { log, downloadPhoto, FrequencyLimiter, userData } from "./utils.js";
 import { TelegramClient } from "./telegram.js";
 import { CrosstCommands } from "./command.js";
 import strings from "../strings.js";
@@ -28,6 +28,10 @@ export class CrosstClient {
                 break;
             // 用户加入频道通知
             case 'onlineAdd':
+                // 加入频率限制器
+                FrequencyLimiter.add(nick);
+                if (FrequencyLimiter.exceeds(nick))
+                    FrequencyLimiter.warn(nick);
                 // 如果用户设置了加入欢迎，则随机挑选一条进行发送
                 if (userData.welcome.length > 0) {
                     let welcome = userData.welcome[Math.floor(Math.random() * userData.welcome.length)];
@@ -46,6 +50,14 @@ export class CrosstClient {
                 break;
             // 多为系统通知，如当前时间、在线列表等
             case 'info':
+                if (text.includes('封禁了')) {
+                    let victim = text.slice(text.indexOf('封禁了') + 4, text.indexOf('，'));
+                    let hash = text.slice(text.indexOf('用户哈希：') + 5);
+                    if (FrequencyLimiter.exceeds(victim)) {
+                        CrosstClient.scheduleUnban(hash, 180);
+                        FrequencyLimiter.clear(victim);
+                    }
+                }
                 await TelegramClient.syncMessage({ nick: 'System', text: text, trip: 'info' }, true);
                 break;
             // 警告信息
@@ -134,5 +146,19 @@ export class CrosstClient {
             // 转交给传输图片的函数处理
             await downloadPhoto(fileId, Markdown.from(caption, entities || []));
         }
+    }
+
+    static ban(nick) {
+        CrosstWs.send(JSON.stringify({ cmd: 'ban', nick: nick }));
+    }
+
+    static unban(hash) {
+        CrosstWs.send(JSON.stringify({ cmd: 'unban', hash: hash }));
+    }
+
+    static scheduleUnban(hash, sec) {
+        setTimeout(() => {
+            this.unban(hash);
+        }, sec * 1000);
     }
 }

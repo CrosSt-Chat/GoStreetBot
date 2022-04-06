@@ -1,11 +1,12 @@
 import * as fs from 'fs';
-import { ADMIN_ID, bot, BOT_TOKEN, SMMS_TOKEN } from "../../index.js";
+import { ADMIN_ID, bot, BOT_TOKEN, LANGUAGE, SMMS_TOKEN } from "../../index.js";
 import strings from "../strings.js";
 import * as path from "path";
 import request from 'request';
 import { CrosstClient } from "./crosst.js";
 
 export let userData = { welcome: [], bye: [] };
+let rateList = {};
 
 /**
  * console.log wrapper，加上时间
@@ -138,4 +139,30 @@ export function uploadPhoto(filePath, caption) {
         }
         fs.rmSync(filePath);
     }, 'utf8');
+}
+
+export class FrequencyLimiter {
+    static exceeds(nick) {
+        return rateList[nick] ? rateList[nick] > 4 : false;
+    }
+
+    static add(nick) {
+        if (!rateList[nick])
+            rateList[nick] = 1;
+        else
+            rateList[nick]++;
+        setTimeout(() => {
+            rateList[nick]--;
+        }, 300000);
+    }
+
+    static warn(nick) {
+        CrosstClient.sendMessageText(`@${nick} ${strings[LANGUAGE]["rateLimit"]}`);
+        CrosstClient.ban(nick);
+        log(`${nick} 加入过于频繁，已封禁 3 分钟`);
+    }
+
+    static clear(nick) {
+        delete rateList[nick];
+    }
 }
