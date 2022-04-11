@@ -15,4 +15,21 @@ A bot that connects Crosst and Telegram.
 - Run `npm install && npm start`.
 - You are good to go. Receive and send messages via your bot, and watch the bot synchronize them to Crosst.
 
+## Commands
+
+You can set commonly used commands via BotFather to ease your daily use. Below is a list of example commands (some require moderator/admin permission). Note that it may vary with future updates of Crosst Chat.
+
+```bash
+help - 帮助
+welcome - 加入自动欢迎
+bye - 退出自动欢送
+me - 以我身份发消息
+listusers - 在线列表
+ban - 封禁 (-n [nick])
+mute - 禁言 (-n [nick] -t [min])
+hash - 获取 hash (-n [nick])
+lockroom - 锁房
+locksite - 锁站
+```
+
 **Note: This is a fan project. It doesn't represent the official of Crosst.**
