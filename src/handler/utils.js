@@ -4,9 +4,11 @@ import strings from "../strings.js";
 import * as path from "path";
 import request from 'request';
 import { CrosstClient } from "./crosst.js";
+import webp from 'webp-converter';
 
 export let userData = { welcome: [], bye: [] };
 let rateList = {};
+webp.grant_permission();
 
 /**
  * console.log wrapper，加上时间
@@ -77,11 +79,25 @@ export async function downloadPhoto(file_id, caption) {
             // 创建写入流
             let file = fs.createWriteStream(realFilePath);
             // 下载图片
-            request(url).pipe(file).on('close', () => {
+            request(url).pipe(file).on('close', async () => {
                 log(`下载完成：${realFilePath}`);
                 file.close();
-                // 进入上传部分
-                uploadPhoto(realFilePath, caption, editMsgId);
+                // 如果是贴纸，则尝试转换
+                if (filePath.endsWith('.webp')) {
+                    let newFilePath = realFilePath.replace('.webp', '.jpg');
+                    try {
+                        await webp.dwebp(realFilePath, newFilePath, '-o');
+                        fs.rmSync(realFilePath);
+                        await uploadPhoto(newFilePath, caption, editMsgId);
+                    }
+                    catch (e) {
+                        log(`webp 转换失败：${e.stack}`, true);
+                    }
+                }
+                else {
+                    // 进入上传部分
+                    await uploadPhoto(realFilePath, caption, editMsgId);
+                }
             });
         } catch (e) {
             log(`传输图片时出错：${e.message}`, true);

@@ -8,6 +8,7 @@
     "dotenv": "^16.0.0",
     "request": "^2.88.2",
     "telegraf": "^4.7.0",
+    "webp-converter": "^2.3.3",
     "ws": "^8.5.0"
   },
   "scripts": {

@@ -106,7 +106,7 @@ export class CrosstClient {
      */
     static async syncMessage(msg) {
         // 消息有两种类别共四种类型：来自自己和来自他人；纯文本和图片
-        let { text, photo, caption, entities, reply_to_message } = msg, replyText = '', sender = '';
+        let { text, photo, caption, entities, reply_to_message, sticker } = msg, replyText = '', sender = '';
         // 如果是回复消息，则进行一下预处理
         if (reply_to_message) {
             // 消息可能是纯文本，也可能是带图片的消息并包含 caption，其它类型不作支持
@@ -120,6 +120,8 @@ export class CrosstClient {
             // 如果消息中包含图片，则添加一个标识
             if (reply_to_message.photo)
                 replyText = '[图片]\n' + replyText;
+            else if (reply_to_message.sticker)
+                replyText = '[贴纸]\n' + replyText;
         }
         if (text) {
             // 先格式化文本
@@ -141,8 +143,19 @@ export class CrosstClient {
             // 发送至十字街
             this.sendMessageText(text);
         }
-        else if (photo) {
-            let photo = msg.photo, fileId = photo[photo.length - 1].file_id;
+        else if (photo || sticker) {
+            let fileId;
+            if (photo) {
+                let photo = msg.photo;
+                fileId = photo[photo.length - 1].file_id;
+            }
+            else {
+                if (sticker.is_animated || sticker.is_video) {
+                    log(strings[LANGUAGE]["stickerUnsupported"], true);
+                    return;
+                }
+                fileId = sticker.file_id;
+            }
             // 转交给传输图片的函数处理
             await downloadPhoto(fileId, Markdown.from(caption, entities || []));
         }
