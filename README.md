@@ -21,8 +21,6 @@ You can set commonly used commands via BotFather to ease your daily use. Below i
 
 ```bash
 help - 帮助
-welcome - 加入自动欢迎
-bye - 退出自动欢送
 me - 以我身份发消息
 listusers - 在线列表
 ban - 封禁 (-n [nick])
@@ -30,6 +28,9 @@ mute - 禁言 (-n [nick] -t [min])
 hash - 获取 hash (-n [nick])
 lockroom - 锁房
 locksite - 锁站
+whisper - 私聊
+welcome - 加入自动欢迎
+bye - 退出自动欢送
 ```
 
 **Note: This is a fan project. It doesn't represent the official of Crosst.**
