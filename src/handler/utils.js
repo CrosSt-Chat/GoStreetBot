@@ -62,7 +62,8 @@ export function saveBotData() {
 export async function downloadPhoto(file_id, caption) {
     // 此功能需要用户提供 sm.ms 的用户令牌
     if (SMMS_TOKEN) {
-        log(`正在下载图片...`, true);
+        let editMsg = await bot.telegram.sendMessage(ADMIN_ID, strings[LANGUAGE]["downloading"]).catch(() => { });
+        let editMsgId = editMsg.message_id ? editMsg.message_id : null;
         // 向 Telegram 服务端请求文件下载链接
         let result = await bot.telegram.getFile(file_id);
         let filePath = result.file_path;
@@ -80,7 +81,7 @@ export async function downloadPhoto(file_id, caption) {
                 log(`下载完成：${realFilePath}`);
                 file.close();
                 // 进入上传部分
-                uploadPhoto(realFilePath, caption);
+                uploadPhoto(realFilePath, caption, editMsgId);
             });
         } catch (e) {
             log(`传输图片时出错：${e.message}`, true);
@@ -95,9 +96,19 @@ export async function downloadPhoto(file_id, caption) {
  * 将本地图片上传至 sm.ms
  * @param filePath
  * @param caption
+ * @param editMsgId
  */
-export function uploadPhoto(filePath, caption) {
-    log(`正在上传至图床...`, true);
+async function uploadPhoto(filePath, caption, editMsgId) {
+    if (editMsgId) {
+        try {
+            await bot.telegram.editMessageText(ADMIN_ID, editMsgId, null, strings[LANGUAGE]["uploading"]);
+        }
+        catch (e) {
+            if (e.message.includes('not found')) {
+                await bot.telegram.sendMessage(ADMIN_ID, strings[LANGUAGE]["uploading"]);
+            }
+        }
+    }
     // POST 选项
     let options = {
         uri: 'https://sm.ms/api/v2/upload',
@@ -138,12 +149,13 @@ export function uploadPhoto(filePath, caption) {
                 log(`上传图片时出错：${data.message}`, true);
         }
         fs.rmSync(filePath);
+        bot.telegram.deleteMessage(ADMIN_ID, editMsgId).catch(() => { });
     }, 'utf8');
 }
 
 export class FrequencyLimiter {
     static exceeds(nick) {
-        return rateList[nick] ? rateList[nick] > 4 : false;
+        return rateList[nick] ? rateList[nick] >= 3 : false;
     }
 
     static add(nick) {
@@ -153,7 +165,7 @@ export class FrequencyLimiter {
             rateList[nick]++;
         setTimeout(() => {
             rateList[nick]--;
-        }, 300000);
+        }, 60000);
     }
 
     static warn(nick) {
